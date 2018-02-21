@@ -26,7 +26,7 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "{PREFFIX}assert.h"
+#include "{PREFFIX}Assert.h"
 
 #include <stdio.h>
 #include <stdarg.h>
