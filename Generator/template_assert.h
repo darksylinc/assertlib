@@ -3,6 +3,10 @@
 * Copyright (c) 2018, Matias N. Goldberg (small enhancements, ported to other compilers)
 * All rights reserved.
 *
+* THIS FILE WAS AUTOMATICALLY GENERATED USING AssertLib
+*
+* See https://bitbucket.org/dark_sylinc/AssertLib
+*
 * Redistribution and use in source and binary forms, with or without
 * modification, are permitted provided that the following conditions are met:
 *     * Redistributions of source code must retain the above copyright
