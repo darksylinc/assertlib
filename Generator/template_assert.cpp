@@ -81,18 +81,18 @@ Assert::FailBehavior DefaultHandler(const char* condition,
 								MB_ICONERROR|MB_ABORTRETRYIGNORE );
 
 	if( msgboxId == IDABORT )
-	{
+	{{
 		raise(SIGABRT);
 		return Assert::Halt;
-	}
+	}}
 	else if( msgboxId == IDRETRY )
-	{
+	{{
 		return Assert::Halt;
-	}
+	}}
 	else //if( msgboxId == IDIGNORE )
-	{
+	{{
 		return Assert::Continue;
-	}
+	}}
 #else
 	fprintf(stderr, "%s(%d): Assert Failure: ", file, line);
 
