@@ -30,6 +30,15 @@
 * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+#if _MSC_VER && !defined( _CONSOLE )
+	#define _CRT_SECURE_NO_WARNINGS
+	#define WIN32_LEAN_AND_MEAN
+	#define VC_EXTRALEAN
+	#include <Windows.h>
+	#include <stdlib.h>
+	#include <signal.h> //raise(SIGABRT)
+#endif
+
 #include "{PREFFIX}Assert.h"
 
 #include <stdio.h>
@@ -41,24 +50,64 @@ namespace {PREFFIX}
 namespace
 {{
 
-Assert::FailBehavior DefaultHandler(const char* condition, 
-									const char* msg, 
-									const char* file, 
+Assert::FailBehavior DefaultHandler(const char* condition,
+									const char* msg,
+									const char* file,
 									const int line)
 {{
-    printf("%s(%d): Assert Failure: ", file, line);
-	
+#if _MSC_VER && _WIN32 && !defined( _CONSOLE )
+	char fullmsg[1024];
+	memset( fullmsg, 0, sizeof(fullmsg) );
+
+	char path[MAX_PATH];
+	GetModuleFileNameA( NULL, path, MAX_PATH );
+
+	_snprintf( fullmsg, sizeof(fullmsg), "Assertion failed!\n\n"
+			   "Program: %s\n"
+			   "File: %s\n"
+			   "Line: %d\n", path, file, line );
+
+	if( condition != NULL )
+		_snprintf( fullmsg, sizeof(fullmsg), "%s\nExpresson: %s\n", fullmsg, condition );
+
+	if( msg != NULL )
+		_snprintf( fullmsg, sizeof(fullmsg), "%s\n%s\n", fullmsg, msg );
+
+	strncat( fullmsg, "\n\n(Press Retry to debug application)", sizeof(fullmsg) );
+
+	fullmsg[sizeof(fullmsg)-1u] = '\0';
+
+	int msgboxId = MessageBoxA( NULL, fullmsg, "Assert Failure!",
+								MB_ICONERROR|MB_ABORTRETRYIGNORE );
+
+	if( msgboxId == IDABORT )
+	{
+		raise(SIGABRT);
+		return Assert::Halt;
+	}
+	else if( msgboxId == IDRETRY )
+	{
+		return Assert::Halt;
+	}
+	else //if( msgboxId == IDIGNORE )
+	{
+		return Assert::Continue;
+	}
+#else
+	printf("%s(%d): Assert Failure: ", file, line);
+
 	if (condition != NULL)
-        printf("'%s' ", condition);
+		printf("'%s' ", condition);
 
 	if (msg != NULL)
-        printf("%s", msg);
+		printf("%s", msg);
 
-    printf("\n");
+	printf("\n");
 
-    fflush( stdout );
+	fflush( stdout );
 
 	return Assert::Halt;
+#endif
 }}
 
 Assert::Handler& GetAssertHandlerInstance()
@@ -79,9 +128,9 @@ void Assert::SetHandler(Assert::Handler newHandler)
 	GetAssertHandlerInstance() = newHandler;
 }}
 
-Assert::FailBehavior Assert::ReportFailure(const char* condition, 
-										   const char* file, 
-										   const int line, 
+Assert::FailBehavior Assert::ReportFailure(const char* condition,
+										   const char* file,
+										   const int line,
 										   const char* msg, ...)
 {{
 	const char* message = NULL;
