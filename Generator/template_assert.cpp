@@ -94,17 +94,17 @@ Assert::FailBehavior DefaultHandler(const char* condition,
 		return Assert::Continue;
 	}
 #else
-	printf("%s(%d): Assert Failure: ", file, line);
+	fprintf(stderr, "%s(%d): Assert Failure: ", file, line);
 
 	if (condition != NULL)
-		printf("'%s' ", condition);
+		fprintf(stderr, "'%s' ", condition);
 
 	if (msg != NULL)
-		printf("%s", msg);
+		fprintf(stderr, "%s", msg);
 
-	printf("\n");
+	fprintf(stderr, "\n");
 
-	fflush( stdout );
+	fflush( stderr );
 
 	return Assert::Halt;
 #endif
